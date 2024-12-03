@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using TopDownView_Console_App;
@@ -32,8 +33,28 @@ namespace MyApp
             }
             int pRow = new int();
             int pCol = new int();
+            
             int BulletR = new int();
             int BulletC = new int();
+            Enemy enemy = new Enemy();
+            enemy.Create(array);
+            int eRow = enemy.enemyR; 
+            int eCol = enemy.enemyC;
+
+
+            //enemy checkup
+            for (int i = 0; i < array.Length; i++)
+            {
+                for (int j = 0; j < array[i].Length; j++)
+                {
+                    if (array[i][j] == "&")
+                    {
+                        eCol = j;
+                        eRow = i;
+                        break;
+                    }
+                }
+            }
             while (true)
             {
                 if (Console.KeyAvailable)
@@ -102,7 +123,30 @@ namespace MyApp
                         array[BulletR][BulletC] = "."; 
                     }
 
+                    if (true)
+                    {
+                        array[0][0] = $"{pRow}";
+                        array[0][1] = $"{eRow}";
+                        if (eRow > pRow)
+                        {
+
+                            array[eRow][eCol] = ".";
+                            array[eRow - 1][eCol] = "&";
+                            eRow--;
+                        }
+                        else if (eRow < pRow)
+                        {
+
+                            array[eRow][eCol] = ".";
+                            array[eRow + 1][eCol] = "&";
+                            eRow++;
+                        }
+                        Debug.WriteLine(eCol + pCol);
+                    }
+
                 }
+
+                
 
             }
             Thread.Sleep(50);

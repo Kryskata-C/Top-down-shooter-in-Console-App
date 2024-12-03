@@ -19,7 +19,6 @@ namespace TopDownView_Console_App
                     }
                 }
                 Thread.Sleep(60);
-                Console.WriteLine("test");
             }
         }
     }
