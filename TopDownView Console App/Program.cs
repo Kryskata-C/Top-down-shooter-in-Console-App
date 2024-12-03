@@ -43,6 +43,12 @@ namespace MyApp
             int eRow = enemy.enemyR; 
             int eCol = enemy.enemyC;
             int countForEndScreen = 0;
+            int moveCount = 0; //later make it so the enemy can moove every seccond turn
+
+
+            bool enemyActive = true;
+
+
             //enemy checkup
             for (int i = 0; i < array.Length; i++)
             {
@@ -58,8 +64,13 @@ namespace MyApp
             }
             while (true)
             {
+                array[0][1] = $"{eRow}";
+
+
                 if (Console.KeyAvailable)
                 {
+
+
                     int test = rnd.Next(0, array.Length);
                     int test2 = rnd.Next(0, array.Length);
 
@@ -67,45 +78,21 @@ namespace MyApp
                     var key = Console.ReadKey(intercept: true).Key;
 
                     if (key == ConsoleKey.Backspace)
-                        break;
-                    else if (key == ConsoleKey.Enter)
-                    {
-                        lock (array)
-                        {
-
-                            array[array.Length / 2][array.Length / 2] = "B";
-                            
-                            for (int i = 0; i < array.Length; i++)
-                            {
-                                for (int j = 0; j < array.Length; j++)
-                                {
-                                    if (array[i][j] == "B")
-                                    {
-                                        pRow = i;
-                                        pCol = j;
-                                    }
-                                    else if (array[i][j] == "^")
-                                    {
-                                        BulletR = i;
-                                        BulletC = j;
-                                    }
-                                }
-                            }
-
-                        }
-                    }
+                        throw new Exception("Game stopped with backspace");
+                    
                     for (int i = 0; i < array.Length; i++)
                         for (int j = 0; j < array.Length; j++)
                             if (array[i][j] == "B") { pRow = i; pCol = j; }
 
                     array[pRow][pCol] = ".";
 
-                    if (key == ConsoleKey.W) array[pRow - 1][pCol] = "B";
-                    else if (key == ConsoleKey.S) array[pRow + 1][pCol] = "B";
-                    else if (key == ConsoleKey.A) array[pRow][pCol - 1] = "B";
-                    else if (key == ConsoleKey.D) array[pRow][pCol + 1] = "B";
+                    if (key == ConsoleKey.W) { array[pRow - 1][pCol] = "B"; array[0][0] = $"{pRow}";}
+                    else if (key == ConsoleKey.S) { array[pRow + 1][pCol] = "B"; array[0][0] = $"{pRow}"; }
+                    else if (key == ConsoleKey.A) { array[pRow][pCol - 1] = "B"; array[0][0] = $"{pRow}"; }
+                    else if (key == ConsoleKey.D) { array[pRow][pCol + 1] = "B"; array[0][0] = $"{pRow}"; }
                     else if (key == ConsoleKey.Q)
                     {
+                        array[0][2] = $"{BulletR}";
                         array[pRow - 1][pCol] = "^";
                         array[pRow][pCol] = "B";
                         BulletR = pRow - 1;
@@ -113,47 +100,54 @@ namespace MyApp
 
                         while (BulletR > 0)
                         {
-                            Thread.Sleep(50); 
+                            Thread.Sleep(50);
                             lock (array)
                             {
-                                array[BulletR][BulletC] = "."; 
-                                BulletR--; 
-                                if (BulletR >= 0) array[BulletR][BulletC] = "^"; 
+                                array[BulletR][BulletC] = ".";
+                                BulletR--;
+                                if (BulletR >= 0) array[BulletR][BulletC] = "^";
                             }
                         }
-                        array[BulletR][BulletC] = "."; 
+                        array[BulletR][BulletC] = ".";
                     }
-
+                    enemyActive = false;  
                     if (true)
                     {
-                        array[0][0] = $"{pRow}";
-                        array[0][1] = $"{eRow}";
-                        if (eRow > pRow)
+                       
+                        if (enemyActive)
                         {
 
-                            array[eRow][eCol] = ".";
-                            array[eRow - 1][eCol] = "&";
-                            eRow--;
-                        }
-                        else if (eRow < pRow)
-                        {
+                            if (BulletR == eRow && BulletC == eCol)
+                            {
+                                array[3][3] = "Dead";
+                            }
+                            if (eRow > pRow)
+                            {
 
-                            array[eRow][eCol] = ".";
-                            array[eRow + 1][eCol] = "&";
-                            eRow++;
-                        }
+                                array[eRow][eCol] = ".";
+                                array[eRow - 1][eCol] = "&";
+                                eRow--;
+                            }
+                            else if (eRow < pRow)
+                            {
 
-                        if (eCol > pCol)
-                        {
-                            array[eRow][eCol] = ".";
-                            array[eRow][eCol - 1] = "&";
-                            eCol--;
-                        }
-                        else if (eCol < pCol)
-                        {
-                            array[eRow][eCol] = ".";
-                            array[eRow][eCol + 1] = "&";
-                            eCol++;
+                                array[eRow][eCol] = ".";
+                                array[eRow + 1][eCol] = "&";
+                                eRow++;
+                            }
+
+                            if (eCol > pCol)
+                            {
+                                array[eRow][eCol] = ".";
+                                array[eRow][eCol - 1] = "&";
+                                eCol--;
+                            }
+                            else if (eCol < pCol)
+                            {
+                                array[eRow][eCol] = ".";
+                                array[eRow][eCol + 1] = "&";
+                                eCol++;
+                            }
                         }
 
                         if (eRow == pRow && eCol == pCol)
