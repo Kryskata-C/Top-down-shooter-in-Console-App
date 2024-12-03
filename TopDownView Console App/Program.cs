@@ -8,6 +8,8 @@ namespace MyApp
 {
     public class Program
     {
+       public int updateCounter = 50;
+
         static void Main(string[] args)
         {
             Random rnd = new Random();
@@ -24,7 +26,7 @@ namespace MyApp
             }
 
             _ = Task.Run(() => DArray.UpdateArray(ref array));
-
+        
             Thread.Sleep(50);
 
             lock (array)
@@ -40,8 +42,7 @@ namespace MyApp
             enemy.Create(array);
             int eRow = enemy.enemyR; 
             int eCol = enemy.enemyC;
-
-
+            int countForEndScreen = 0;
             //enemy checkup
             for (int i = 0; i < array.Length; i++)
             {
@@ -140,6 +141,58 @@ namespace MyApp
                             array[eRow][eCol] = ".";
                             array[eRow + 1][eCol] = "&";
                             eRow++;
+                        }
+
+                        if (eCol > pCol)
+                        {
+                            array[eRow][eCol] = ".";
+                            array[eRow][eCol - 1] = "&";
+                            eCol--;
+                        }
+                        else if (eCol < pCol)
+                        {
+                            array[eRow][eCol] = ".";
+                            array[eRow][eCol + 1] = "&";
+                            eCol++;
+                        }
+
+                        if (eRow == pRow && eCol == pCol)
+                        {
+                            for (int i = 0; i < array.Length;)
+                            {
+                                if (countForEndScreen == 0)
+                                {
+                                    array[0][array.Length / 2] = "L";
+                                    countForEndScreen++;
+                                }
+                                if (countForEndScreen == 1)
+                                {
+                                    array[0][array.Length / 2 + 1] = "O";
+                                    countForEndScreen++;
+                                }
+                                if (countForEndScreen == 2)
+                                {
+                                    array[0][array.Length / 2 + 2] = "O";
+                                    countForEndScreen++;
+                                }
+                                if (countForEndScreen == 3)
+                                {
+                                    array[0][array.Length / 2 + 3] = "S";
+                                    countForEndScreen++;
+                                }
+                                if (countForEndScreen == 4)
+                                {
+                                    array[0][array.Length / 2 + 4] = "E";
+                                    countForEndScreen++;
+                                }
+                                if (countForEndScreen == 5)
+                                {
+                                    array[0][array.Length / 2 + 5] = "R";
+                                    countForEndScreen = 0;
+                                }
+
+
+                            }
                         }
                         Debug.WriteLine(eCol + pCol);
                     }

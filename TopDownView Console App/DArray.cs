@@ -1,8 +1,10 @@
-﻿using System;
+﻿using MyApp;
+using System;
 using System.Threading;
-
+using TopDownView_Console_App;
 namespace TopDownView_Console_App
 {
+
     public static class DArray
     {
         public static void UpdateArray(ref string[][] array)
@@ -18,7 +20,7 @@ namespace TopDownView_Console_App
                         Console.WriteLine(string.Join(" ", row ?? Array.Empty<string>()));
                     }
                 }
-                Thread.Sleep(60);
+                Thread.Sleep(50);
             }
         }
     }
