@@ -18,7 +18,8 @@ namespace TopDownView_Console_App
                         Console.WriteLine(string.Join(" ", row ?? Array.Empty<string>()));
                     }
                 }
-                Thread.Sleep(50);
+                Thread.Sleep(60);
+                Console.WriteLine("test");
             }
         }
     }
