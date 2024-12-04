@@ -45,7 +45,7 @@ namespace MyApp
             int countForEndScreen = 0;
             int moveCount = 0; //later make it so the enemy can moove every seccond turn
 
-
+            bool foundBullet = false;
             bool enemyActive = true;
 
 
@@ -66,10 +66,27 @@ namespace MyApp
             {
                 array[0][1] = $"{eRow}";
 
+                
 
                 if (Console.KeyAvailable)
                 {
-
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        for (int j = 0; j < array.Length; j++)
+                        {
+                            if (array[j][i] == "^")
+                            {
+                                BulletR = j;
+                                BulletC = i;
+                                foundBullet = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!foundBullet)
+                    {
+                        array[0][2] = "N";
+                    }
 
                     int test = rnd.Next(0, array.Length);
                     int test2 = rnd.Next(0, array.Length);
@@ -92,7 +109,7 @@ namespace MyApp
                     else if (key == ConsoleKey.D) { array[pRow][pCol + 1] = "B"; array[0][0] = $"{pRow}"; }
                     else if (key == ConsoleKey.Q)
                     {
-                        array[0][2] = $"{BulletR}";
+                        
                         array[pRow - 1][pCol] = "^";
                         array[pRow][pCol] = "B";
                         BulletR = pRow - 1;
@@ -103,6 +120,7 @@ namespace MyApp
                             Thread.Sleep(50);
                             lock (array)
                             {
+                                array[0][2] = $"{BulletR}";
                                 array[BulletR][BulletC] = ".";
                                 BulletR--;
                                 if (BulletR >= 0) array[BulletR][BulletC] = "^";
@@ -188,7 +206,6 @@ namespace MyApp
 
                             }
                         }
-                        Debug.WriteLine(eCol + pCol);
                     }
 
                 }
