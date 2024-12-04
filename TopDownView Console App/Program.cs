@@ -8,14 +8,14 @@ namespace MyApp
 {
     public class Program
     {
-       public int updateCounter = 50;
+        public int updateCounter = 50;
 
         static void Main(string[] args)
         {
             Random rnd = new Random();
-
             string[][] array = new string[20][];
 
+            // Initialize the array
             for (int i = 0; i < array.Length; i++)
             {
                 array[i] = new string[20];
@@ -25,36 +25,46 @@ namespace MyApp
                 }
             }
 
+            // Start updating the array asynchronously
             _ = Task.Run(() => DArray.UpdateArray(ref array));
-        
             Thread.Sleep(50);
 
             lock (array)
             {
                 Array.Resize(ref array, array.Length);
             }
-            int pRow = new int();
-            int pCol = new int();
-            
-            int BulletR = new int();
-            int BulletC = new int();
+
+            string PlayerChar = "B";
+            string BulletChar = "^";
+            string EnemyChar = "&";
+            string EmptyChar = ".";
+            string WinMessage = "Winner";
+
+
+            int pRow = 0;
+            int pCol = 0;
+            int BulletR = 0;
+            int BulletC = 0;
+
             Enemy enemy = new Enemy();
             enemy.Create(array);
-            int eRow = enemy.enemyR; 
+            int eRow = enemy.enemyR;
             int eCol = enemy.enemyC;
-            int countForEndScreen = 0;
-            int moveCount = 0; //later make it so the enemy can moove every seccond turn
 
+            int countForEndScreen = 0;
+            int moveCount = 0; // Later make it so the enemy can move every second turn
+
+            string lookSide = null;
             bool foundBullet = false;
             bool enemyActive = true;
             bool bulletIsBeingShot = false;
 
-            //enemy checkup
+            // Enemy checkup
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array[i].Length; j++)
                 {
-                    if (array[i][j] == "&")
+                    if (array[i][j] == EnemyChar)
                     {
                         eCol = j;
                         eRow = i;
@@ -63,22 +73,20 @@ namespace MyApp
                 }
             }
 
-            
-
             while (true)
             {
                 array[0][1] = $"{eRow}";
 
-                //player checkup
+                // Player checkup
                 for (int i = 0; i < array.Length; i++)
                 {
                     for (int j = 0; j < array[i].Length; j++)
                     {
-                        if (array[i][j] == "B")
+                        if (array[i][j] == PlayerChar)
                         {
                             pCol = j;
                             pRow = i;
-                            array[0][0] = $"{pRow}"; 
+                            array[0][0] = $"{pRow}";
                             break;
                         }
                     }
@@ -86,11 +94,12 @@ namespace MyApp
 
                 if (Console.KeyAvailable)
                 {
+                    // Find bullet position
                     for (int i = 0; i < array.Length; i++)
                     {
                         for (int j = 0; j < array.Length; j++)
                         {
-                            if (array[j][i] == "^")
+                            if (array[j][i] == BulletChar)
                             {
                                 BulletR = j;
                                 BulletC = i;
@@ -99,6 +108,7 @@ namespace MyApp
                             }
                         }
                     }
+
                     if (!foundBullet)
                     {
                         array[0][2] = "NAN";
@@ -107,111 +117,172 @@ namespace MyApp
                     int test = rnd.Next(0, array.Length);
                     int test2 = rnd.Next(0, array.Length);
 
-
                     var key = Console.ReadKey(intercept: true).Key;
 
                     if (key == ConsoleKey.Backspace)
                         throw new Exception("Game stopped with backspace");
-                    
+
+                    // Find player position
                     for (int i = 0; i < array.Length; i++)
+                    {
                         for (int j = 0; j < array.Length; j++)
-                            if (array[i][j] == "B") { pRow = i; pCol = j; }
+                        {
+                            if (array[i][j] == PlayerChar)
+                            {
+                                pRow = i;
+                                pCol = j;
+                            }
+                        }
+                    }
 
-                    array[pRow][pCol] = ".";
+                    array[pRow][pCol] = EmptyChar;
 
-                    if (key == ConsoleKey.W) { array[pRow - 1][pCol] = "B"; pRow--; }
-                    else if (key == ConsoleKey.S) { array[pRow + 1][pCol] = "B"; pRow++; }
-                    else if (key == ConsoleKey.A) { array[pRow][pCol - 1] = "B"; pCol--;  }
-                    else if (key == ConsoleKey.D) { array[pRow][pCol + 1] = "B"; pCol++; }
+                    // Player logic
+                    if (key == ConsoleKey.W)
+                    {
+                        array[pRow - 1][pCol] = PlayerChar;
+                        pRow--;
+                        lookSide = "forward";
+                    }
+                    else if (key == ConsoleKey.S)
+                    {
+                        array[pRow + 1][pCol] = PlayerChar;
+                        pRow++;
+                        lookSide = "backward";
+                    }
+                    else if (key == ConsoleKey.A)
+                    {
+                        array[pRow][pCol - 1] = PlayerChar;
+                        pCol--;
+                        lookSide = "left";
+                    }
+                    else if (key == ConsoleKey.D)
+                    {
+                        array[pRow][pCol + 1] = PlayerChar;
+                        pCol++;
+                        lookSide = "right";
+                    }
                     else if (key == ConsoleKey.Q && !bulletIsBeingShot)
                     {
                         bulletIsBeingShot = true;
+                        int bulletR = 0, bulletC = 0;
+                        int dRow = 0, dCol = 0;
 
                         lock (array)
                         {
-                            array[pRow - 1][pCol] = "^";
-                            array[pRow][pCol] = "B"; 
+                            if (lookSide == "forward")
+                            {
+                                array[pRow - 1][pCol] = BulletChar;
+                                array[pRow][pCol] = PlayerChar;
+                                bulletR = pRow - 1;
+                                bulletC = pCol;
+                                dRow = -1;
+                                dCol = 0;
+                            }
+                            else if (lookSide == "backward")
+                            {
+                                array[pRow + 1][pCol] = BulletChar;
+                                array[pRow][pCol] = PlayerChar;
+                                bulletR = pRow + 1;
+                                bulletC = pCol;
+                                dRow = 1;
+                                dCol = 0;
+                            }
+                            else if (lookSide == "left")
+                            {
+                                array[pRow][pCol - 1] = BulletChar;
+                                array[pRow][pCol] = PlayerChar;
+                                bulletR = pRow;
+                                bulletC = pCol - 1;
+                                dRow = 0;
+                                dCol = -1;
+                            }
+                            else if (lookSide == "right")
+                            {
+                                array[pRow][pCol + 1] = BulletChar;
+                                array[pRow][pCol] = PlayerChar;
+                                bulletR = pRow;
+                                bulletC = pCol + 1;
+                                dRow = 0;
+                                dCol = 1;
+                            }
                         }
-
-                        int bulletR = pRow - 1;
-                        int bulletC = pCol;
 
                         Task.Run(() =>
                         {
                             try
                             {
-                                while (bulletR > 0)
+                                while (bulletR >= 0 && bulletR < array.Length && bulletC >= 0 && bulletC < array[0].Length)
                                 {
-                                    Thread.Sleep(50); 
+                                    Thread.Sleep(50);
 
                                     lock (array)
                                     {
-                                        array[0][2] = $"{bulletR}";
-
                                         if (bulletR == eRow && bulletC == eCol)
                                         {
                                             array[0][3] = "Winner";
-                                            break; 
+                                            break;
                                         }
 
-                                        array[bulletR][bulletC] = ".";
-                                        bulletR--;
+                                        array[bulletR][bulletC] = EmptyChar;
+                                        bulletR += dRow;
+                                        bulletC += dCol;
 
-                                        if (bulletR >= 0)
+                                        if (bulletR >= 0 && bulletR < array.Length && bulletC >= 0 && bulletC < array[0].Length)
                                         {
-                                            array[bulletR][bulletC] = "^";
+                                            array[bulletR][bulletC] = BulletChar;
                                         }
                                     }
                                 }
                                 lock (array)
                                 {
-                                    if (bulletR >= 0)
+                                    if (bulletR >= 0 && bulletR < array.Length && bulletC >= 0 && bulletC < array[0].Length)
                                     {
-                                        array[bulletR][bulletC] = ".";
+                                        array[bulletR][bulletC] = EmptyChar;
                                     }
-                                    array[pRow][pCol] = "B";
+                                    array[pRow][pCol] = PlayerChar;
                                 }
                             }
-                            finally {bulletIsBeingShot = false;}
+                            finally
+                            {
+                                bulletIsBeingShot = false;
+                            }
                         });
                     }
 
-
-                    enemyActive = true;  
+                    // Enemy logic
+                    enemyActive = false;
                     if (true)
                     {
-                       
                         if (enemyActive)
                         {
-
                             if (BulletR == eRow && BulletC == eCol)
                             {
                                 array[3][3] = "Dead";
                             }
                             if (eRow > pRow)
                             {
-                                array[eRow][eCol] = ".";
-                                array[eRow - 1][eCol] = "&";
+                                array[eRow][eCol] = EmptyChar;
+                                array[eRow - 1][eCol] = EnemyChar;
                                 eRow--;
                             }
                             else if (eRow < pRow)
                             {
-
-                                array[eRow][eCol] = ".";
-                                array[eRow + 1][eCol] = "&";
+                                array[eRow][eCol] = EmptyChar;
+                                array[eRow + 1][eCol] = EnemyChar;
                                 eRow++;
                             }
 
                             if (eCol > pCol)
                             {
-                                array[eRow][eCol] = ".";
-                                array[eRow][eCol - 1] = "&";
+                                array[eRow][eCol] = EmptyChar;
+                                array[eRow][eCol - 1] = EnemyChar;
                                 eCol--;
                             }
                             else if (eCol < pCol)
                             {
-                                array[eRow][eCol] = ".";
-                                array[eRow][eCol + 1] = "&";
+                                array[eRow][eCol] = EmptyChar;
+                                array[eRow][eCol + 1] = EnemyChar;
                                 eCol++;
                             }
                         }
@@ -221,16 +292,10 @@ namespace MyApp
                             array[10][10] = "Enemy wins";
                         }
                     }
-
                 }
 
-                
-
-            }
-            Thread.Sleep(50);
-        }
-                
+                Thread.Sleep(50);
             }
         }
-    
-
+    }
+}
