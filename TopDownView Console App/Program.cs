@@ -121,6 +121,10 @@ namespace MyApp
                             lock (array)
                             {
                                 array[0][2] = $"{BulletR}";
+                                if (BulletR == eRow && BulletC == eCol)
+                                {
+                                    array[0][3] = "Winner";
+                                }
                                 array[BulletR][BulletC] = ".";
                                 BulletR--;
                                 if (BulletR >= 0) array[BulletR][BulletC] = "^";
