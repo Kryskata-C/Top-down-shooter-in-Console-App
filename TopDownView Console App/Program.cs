@@ -47,7 +47,7 @@ namespace MyApp
 
             bool foundBullet = false;
             bool enemyActive = true;
-
+            bool bulletIsBeingShot = false;
 
             //enemy checkup
             for (int i = 0; i < array.Length; i++)
@@ -62,11 +62,27 @@ namespace MyApp
                     }
                 }
             }
+
+            
+
             while (true)
             {
                 array[0][1] = $"{eRow}";
 
-                
+                //player checkup
+                for (int i = 0; i < array.Length; i++)
+                {
+                    for (int j = 0; j < array[i].Length; j++)
+                    {
+                        if (array[i][j] == "B")
+                        {
+                            pCol = j;
+                            pRow = i;
+                            array[0][0] = $"{pRow}"; 
+                            break;
+                        }
+                    }
+                }
 
                 if (Console.KeyAvailable)
                 {
@@ -85,7 +101,7 @@ namespace MyApp
                     }
                     if (!foundBullet)
                     {
-                        array[0][2] = "N";
+                        array[0][2] = "NAN";
                     }
 
                     int test = rnd.Next(0, array.Length);
@@ -103,36 +119,65 @@ namespace MyApp
 
                     array[pRow][pCol] = ".";
 
-                    if (key == ConsoleKey.W) { array[pRow - 1][pCol] = "B"; array[0][0] = $"{pRow}";}
-                    else if (key == ConsoleKey.S) { array[pRow + 1][pCol] = "B"; array[0][0] = $"{pRow}"; }
-                    else if (key == ConsoleKey.A) { array[pRow][pCol - 1] = "B"; array[0][0] = $"{pRow}"; }
-                    else if (key == ConsoleKey.D) { array[pRow][pCol + 1] = "B"; array[0][0] = $"{pRow}"; }
-                    else if (key == ConsoleKey.Q)
+                    if (key == ConsoleKey.W) { array[pRow - 1][pCol] = "B"; pRow--; }
+                    else if (key == ConsoleKey.S) { array[pRow + 1][pCol] = "B"; pRow++; }
+                    else if (key == ConsoleKey.A) { array[pRow][pCol - 1] = "B"; pCol--;  }
+                    else if (key == ConsoleKey.D) { array[pRow][pCol + 1] = "B"; pCol++; }
+                    else if (key == ConsoleKey.Q && !bulletIsBeingShot)
                     {
-                        
-                        array[pRow - 1][pCol] = "^";
-                        array[pRow][pCol] = "B";
-                        BulletR = pRow - 1;
-                        BulletC = pCol;
+                        bulletIsBeingShot = true;
 
-                        while (BulletR > 0)
+                        lock (array)
                         {
-                            Thread.Sleep(50);
-                            lock (array)
-                            {
-                                array[0][2] = $"{BulletR}";
-                                if (BulletR == eRow && BulletC == eCol)
-                                {
-                                    array[0][3] = "Winner";
-                                }
-                                array[BulletR][BulletC] = ".";
-                                BulletR--;
-                                if (BulletR >= 0) array[BulletR][BulletC] = "^";
-                            }
+                            array[pRow - 1][pCol] = "^";
+                            array[pRow][pCol] = "B"; 
                         }
-                        array[BulletR][BulletC] = ".";
+
+                        int bulletR = pRow - 1;
+                        int bulletC = pCol;
+
+                        Task.Run(() =>
+                        {
+                            try
+                            {
+                                while (bulletR > 0)
+                                {
+                                    Thread.Sleep(50); 
+
+                                    lock (array)
+                                    {
+                                        array[0][2] = $"{bulletR}";
+
+                                        if (bulletR == eRow && bulletC == eCol)
+                                        {
+                                            array[0][3] = "Winner";
+                                            break; 
+                                        }
+
+                                        array[bulletR][bulletC] = ".";
+                                        bulletR--;
+
+                                        if (bulletR >= 0)
+                                        {
+                                            array[bulletR][bulletC] = "^";
+                                        }
+                                    }
+                                }
+                                lock (array)
+                                {
+                                    if (bulletR >= 0)
+                                    {
+                                        array[bulletR][bulletC] = ".";
+                                    }
+                                    array[pRow][pCol] = "B";
+                                }
+                            }
+                            finally {bulletIsBeingShot = false;}
+                        });
                     }
-                    enemyActive = false;  
+
+
+                    enemyActive = true;  
                     if (true)
                     {
                        
@@ -145,7 +190,6 @@ namespace MyApp
                             }
                             if (eRow > pRow)
                             {
-
                                 array[eRow][eCol] = ".";
                                 array[eRow - 1][eCol] = "&";
                                 eRow--;
@@ -174,41 +218,7 @@ namespace MyApp
 
                         if (eRow == pRow && eCol == pCol)
                         {
-                            for (int i = 0; i < array.Length;)
-                            {
-                                if (countForEndScreen == 0)
-                                {
-                                    array[0][array.Length / 2] = "L";
-                                    countForEndScreen++;
-                                }
-                                if (countForEndScreen == 1)
-                                {
-                                    array[0][array.Length / 2 + 1] = "O";
-                                    countForEndScreen++;
-                                }
-                                if (countForEndScreen == 2)
-                                {
-                                    array[0][array.Length / 2 + 2] = "O";
-                                    countForEndScreen++;
-                                }
-                                if (countForEndScreen == 3)
-                                {
-                                    array[0][array.Length / 2 + 3] = "S";
-                                    countForEndScreen++;
-                                }
-                                if (countForEndScreen == 4)
-                                {
-                                    array[0][array.Length / 2 + 4] = "E";
-                                    countForEndScreen++;
-                                }
-                                if (countForEndScreen == 5)
-                                {
-                                    array[0][array.Length / 2 + 5] = "R";
-                                    countForEndScreen = 0;
-                                }
-
-
-                            }
+                            array[10][10] = "Enemy wins";
                         }
                     }
 
