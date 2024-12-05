@@ -35,14 +35,19 @@ namespace MyApp
             }
 
             string PlayerChar = "B";
+            Console.ForegroundColor = ConsoleColor.Red;
             string BulletChar = "^";
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Green;
             string EnemyChar = "&";
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Yellow;
             string EmptyChar = ".";
             string WinMessage = "Winner";
+            Console.ResetColor();
 
-
-            int pRow = 0;
-            int pCol = 0;
+            int pRow = 10;
+            int pCol = 10;
             int BulletR = 0;
             int BulletC = 0;
 
@@ -51,13 +56,13 @@ namespace MyApp
             int eRow = enemy.enemyR;
             int eCol = enemy.enemyC;
 
-            int countForEndScreen = 0;
-            int moveCount = 0; // Later make it so the enemy can move every second turn
+            int moveCount = 0;
 
             string lookSide = null;
             bool foundBullet = false;
             bool enemyActive = true;
             bool bulletIsBeingShot = false;
+
 
             // Enemy checkup
             for (int i = 0; i < array.Length; i++)
@@ -103,7 +108,10 @@ namespace MyApp
                             {
                                 BulletR = j;
                                 BulletC = i;
+
                                 foundBullet = true;
+                                array[0][2] = $"{BulletR}";
+
                                 break;
                             }
                         }
@@ -138,30 +146,36 @@ namespace MyApp
                     array[pRow][pCol] = EmptyChar;
 
                     // Player logic
-                    if (key == ConsoleKey.W)
+                    if (key == ConsoleKey.W && pRow > 0)
                     {
+                        array[pRow][pCol] = EmptyChar;
                         array[pRow - 1][pCol] = PlayerChar;
                         pRow--;
                         lookSide = "forward";
                     }
-                    else if (key == ConsoleKey.S)
+                    else if (key == ConsoleKey.S && pRow < array.Length - 1)
                     {
+                        array[pRow][pCol] = EmptyChar;
                         array[pRow + 1][pCol] = PlayerChar;
                         pRow++;
                         lookSide = "backward";
                     }
-                    else if (key == ConsoleKey.A)
+                    else if (key == ConsoleKey.A && pCol > 0)
                     {
+                        array[pRow][pCol] = EmptyChar;
                         array[pRow][pCol - 1] = PlayerChar;
                         pCol--;
                         lookSide = "left";
                     }
-                    else if (key == ConsoleKey.D)
+                    else if (key == ConsoleKey.D && pCol < array[pRow].Length - 1)
                     {
+                        array[pRow][pCol] = EmptyChar;
                         array[pRow][pCol + 1] = PlayerChar;
                         pCol++;
                         lookSide = "right";
                     }
+
+
                     else if (key == ConsoleKey.Q && !bulletIsBeingShot)
                     {
                         bulletIsBeingShot = true;
@@ -208,22 +222,28 @@ namespace MyApp
                             }
                         }
 
+                        //bullet logic
                         Task.Run(() =>
                         {
                             try
                             {
                                 while (bulletR >= 0 && bulletR < array.Length && bulletC >= 0 && bulletC < array[0].Length)
                                 {
+                                    //Bullet loc are broken again but somehow the check if its at the same spot as the enemy works which i cant explain to myself so fuck it
+                                    array[0][2] = $"{BulletR}";
+
                                     Thread.Sleep(50);
 
                                     lock (array)
                                     {
+                                        array[0][2] = $"{BulletR}";
+
                                         if (bulletR == eRow && bulletC == eCol)
                                         {
                                             array[0][3] = "Winner";
                                             break;
                                         }
-
+                                        
                                         array[bulletR][bulletC] = EmptyChar;
                                         bulletR += dRow;
                                         bulletC += dCol;
@@ -231,6 +251,7 @@ namespace MyApp
                                         if (bulletR >= 0 && bulletR < array.Length && bulletC >= 0 && bulletC < array[0].Length)
                                         {
                                             array[bulletR][bulletC] = BulletChar;
+
                                         }
                                     }
                                 }
@@ -238,6 +259,7 @@ namespace MyApp
                                 {
                                     if (bulletR >= 0 && bulletR < array.Length && bulletC >= 0 && bulletC < array[0].Length)
                                     {
+
                                         array[bulletR][bulletC] = EmptyChar;
                                     }
                                     array[pRow][pCol] = PlayerChar;
