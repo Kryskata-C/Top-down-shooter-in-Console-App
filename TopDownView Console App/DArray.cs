@@ -1,45 +1,53 @@
 ﻿using MyApp;
 using System;
 using System.Threading;
+
 namespace TopDownView_Console_App
 {
     public static class DArray
     {
         public static void UpdateArray(ref string[][] array)
         {
+            Console.Clear(); // Clear the screen once at the start
+
             while (true)
             {
-                Console.SetCursorPosition(0, 0);
+                Console.SetCursorPosition(0, 0); // Always start from the top-left corner
                 lock (array)
                 {
                     for (int i = 0; i < array.Length; i++)
                     {
                         for (int j = 0; j < array[i].Length; j++)
                         {
-                            if (array[i][j] == "B") 
+                            if (array[i][j] == "B")
                             {
                                 Console.ForegroundColor = ConsoleColor.Blue;
                             }
-                            else if (array[i][j] == "^") 
+                            else if (array[i][j] == "^")
                             {
                                 Console.ForegroundColor = ConsoleColor.Red;
                             }
-                            else if (array[i][j] == "&") 
+                            else if (array[i][j] == "&")
                             {
                                 Console.ForegroundColor = ConsoleColor.Green;
                             }
-                            else 
+                            else if (array[i][j] == "D")
+                            {
+                                Console.ForegroundColor = ConsoleColor.Magenta;
+                            }
+                            else
                             {
                                 Console.ForegroundColor = ConsoleColor.Gray;
                             }
 
                             Console.Write(array[i][j] + " ");
                         }
-                        Console.WriteLine();
+                        Console.WriteLine(); 
                     }
                 }
-                Console.ResetColor();
-                Thread.Sleep(50);
+
+                Console.ResetColor(); 
+                Thread.Sleep(1); 
             }
         }
     }

@@ -45,6 +45,8 @@ namespace MyApp
             string EmptyChar = ".";
             string WinMessage = "Winner";
             Console.ResetColor();
+            string Door = "D";
+
 
             int pRow = 10;
             int pCol = 10;
@@ -55,15 +57,19 @@ namespace MyApp
             enemy.Create(array);
             int eRow = enemy.enemyR;
             int eCol = enemy.enemyC;
+            int dorRow = new int();
+            int dorCol = new int(); 
+
 
             int moveCount = 0;
 
             string lookSide = null;
             bool foundBullet = false;
-            bool enemyActive = true;
+            bool enemyActive = new bool(); 
             bool bulletIsBeingShot = false;
+            bool enemyDead = false;
 
-
+            array[rnd.Next(0,array.Length-1)][rnd.Next(0,array.Length-1)] = Door;
             // Enemy checkup
             for (int i = 0; i < array.Length; i++)
             {
@@ -77,11 +83,27 @@ namespace MyApp
                     }
                 }
             }
+            //Door checkup
+            for (int i = 0; i < array.Length; i++)
+            {
+                for (int j = 0; j < array[i].Length; j++)
+                {
+                    if (array[i][j] == Door)
+                    {
+                        dorRow = i; 
+                        dorCol = j; 
+                        break;
+                    }
+                }
+            }
 
             while (true)
             {
-                array[0][1] = $"{eRow}";
-
+                if (!enemyDead) 
+                {
+                    array[dorRow][dorCol] = "D";
+                }
+                array[0][0] = $"{enemyDead}";
                 // Player checkup
                 for (int i = 0; i < array.Length; i++)
                 {
@@ -91,7 +113,6 @@ namespace MyApp
                         {
                             pCol = j;
                             pRow = i;
-                            array[0][0] = $"{pRow}";
                             break;
                         }
                     }
@@ -110,17 +131,13 @@ namespace MyApp
                                 BulletC = i;
 
                                 foundBullet = true;
-                                array[0][2] = $"{BulletR}";
 
                                 break;
                             }
                         }
                     }
 
-                    if (!foundBullet)
-                    {
-                        array[0][2] = "NAN";
-                    }
+                    
 
                     int test = rnd.Next(0, array.Length);
                     int test2 = rnd.Next(0, array.Length);
@@ -175,7 +192,9 @@ namespace MyApp
                         lookSide = "right";
                     }
 
+                    
 
+                    //Bullet keybind shit
                     else if (key == ConsoleKey.Q && !bulletIsBeingShot)
                     {
                         bulletIsBeingShot = true;
@@ -230,17 +249,15 @@ namespace MyApp
                                 while (bulletR >= 0 && bulletR < array.Length && bulletC >= 0 && bulletC < array[0].Length)
                                 {
                                     //Bullet loc are broken again but somehow the check if its at the same spot as the enemy works which i cant explain to myself so fuck it
-                                    array[0][2] = $"{BulletR}";
 
                                     Thread.Sleep(50);
 
                                     lock (array)
                                     {
-                                        array[0][2] = $"{BulletR}";
 
                                         if (bulletR == eRow && bulletC == eCol)
                                         {
-                                            array[0][3] = "Winner";
+                                            enemyDead = true;
                                             break;
                                         }
                                         
@@ -271,6 +288,8 @@ namespace MyApp
                             }
                         });
                     }
+
+                    
 
                     // Enemy logic
                     enemyActive = false;
@@ -314,6 +333,25 @@ namespace MyApp
                             array[10][10] = "Enemy wins";
                         }
                     }
+
+
+
+                    //Room logic
+                    if (pRow == dorRow && pCol == dorCol)
+                    {
+                        if (enemyDead)
+                        {
+                            throw new Exception("New level entered, the change of rooms still not coded in");
+                        }
+                        else
+                        {
+                            Console.SetCursorPosition(0, 22);
+                            Console.WriteLine("You need to defeat the enemy before entering!");
+                        }
+                    }
+
+
+
                 }
 
                 Thread.Sleep(50);
