@@ -162,37 +162,46 @@ namespace MyApp
 
                     array[pRow][pCol] = EmptyChar;
 
-                    // Player logic
-                    if (key == ConsoleKey.W && pRow > 0)
+                    // Player movement logic
+                    // Player movement logic
+                    if (key == ConsoleKey.W && pRow > 0 && !(pRow - 1 == dorRow && pCol == dorCol && !enemyDead))
                     {
                         array[pRow][pCol] = EmptyChar;
                         array[pRow - 1][pCol] = PlayerChar;
                         pRow--;
                         lookSide = "forward";
                     }
-                    else if (key == ConsoleKey.S && pRow < array.Length - 1)
+                    else if (key == ConsoleKey.S && pRow < array.Length - 1 && !(pRow + 1 == dorRow && pCol == dorCol && !enemyDead))
                     {
                         array[pRow][pCol] = EmptyChar;
                         array[pRow + 1][pCol] = PlayerChar;
                         pRow++;
                         lookSide = "backward";
                     }
-                    else if (key == ConsoleKey.A && pCol > 0)
+                    else if (key == ConsoleKey.A && pCol > 0 && !(pRow == dorRow && pCol - 1 == dorCol && !enemyDead))
                     {
                         array[pRow][pCol] = EmptyChar;
                         array[pRow][pCol - 1] = PlayerChar;
                         pCol--;
                         lookSide = "left";
                     }
-                    else if (key == ConsoleKey.D && pCol < array[pRow].Length - 1)
+                    else if (key == ConsoleKey.D && pCol < array[pRow].Length - 1 && !(pRow == dorRow && pCol + 1 == dorCol && !enemyDead))
                     {
                         array[pRow][pCol] = EmptyChar;
                         array[pRow][pCol + 1] = PlayerChar;
                         pCol++;
                         lookSide = "right";
                     }
+                    else if (key == ConsoleKey.W || key == ConsoleKey.S || key == ConsoleKey.A || key == ConsoleKey.D)
+                    {
+                        // Prevent movement and reset player position to avoid "invisibility"
+                        array[pRow][pCol] = PlayerChar;
+                    }
 
-                    
+
+
+
+
 
                     //Bullet keybind shit
                     else if (key == ConsoleKey.Q && !bulletIsBeingShot)

@@ -12,7 +12,7 @@ namespace TopDownView_Console_App
 
             while (true)
             {
-                Console.SetCursorPosition(0, 0); // Always start from the top-left corner
+                Console.SetCursorPosition(0, 0);
                 lock (array)
                 {
                     for (int i = 0; i < array.Length; i++)
@@ -47,7 +47,7 @@ namespace TopDownView_Console_App
                 }
 
                 Console.ResetColor(); 
-                Thread.Sleep(1); 
+                Thread.Sleep(50); 
             }
         }
     }
