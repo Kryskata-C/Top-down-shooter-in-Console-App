@@ -163,7 +163,6 @@ namespace MyApp
                     array[pRow][pCol] = EmptyChar;
 
                     // Player movement logic
-                    // Player movement logic
                     if (key == ConsoleKey.W && pRow > 0 && !(pRow - 1 == dorRow && pCol == dorCol && !enemyDead))
                     {
                         array[pRow][pCol] = EmptyChar;
@@ -194,7 +193,6 @@ namespace MyApp
                     }
                     else if (key == ConsoleKey.W || key == ConsoleKey.S || key == ConsoleKey.A || key == ConsoleKey.D)
                     {
-                        // Prevent movement and reset player position to avoid "invisibility"
                         array[pRow][pCol] = PlayerChar;
                     }
 
@@ -301,47 +299,71 @@ namespace MyApp
                     
 
                     // Enemy logic
-                    enemyActive = false;
-                    if (true)
+                    enemyActive = true;
+                    Task.Run(() =>
                     {
-                        if (enemyActive)
-                        {
-                            if (BulletR == eRow && BulletC == eCol)
-                            {
-                                array[3][3] = "Dead";
-                            }
-                            if (eRow > pRow)
-                            {
-                                array[eRow][eCol] = EmptyChar;
-                                array[eRow - 1][eCol] = EnemyChar;
-                                eRow--;
-                            }
-                            else if (eRow < pRow)
-                            {
-                                array[eRow][eCol] = EmptyChar;
-                                array[eRow + 1][eCol] = EnemyChar;
-                                eRow++;
-                            }
+                        Random random = new Random();
+                        int safeDistance = 3; // Minimum distance between enemy and player
+                        int maxDistance = 6;  // Maximum distance for repositioning
+                        int targetRow = eRow;
 
-                            if (eCol > pCol)
-                            {
-                                array[eRow][eCol] = EmptyChar;
-                                array[eRow][eCol - 1] = EnemyChar;
-                                eCol--;
-                            }
-                            else if (eCol < pCol)
-                            {
-                                array[eRow][eCol] = EmptyChar;
-                                array[eRow][eCol + 1] = EnemyChar;
-                                eCol++;
-                            }
-                        }
-
-                        if (eRow == pRow && eCol == pCol)
+                        Task.Run(() =>
                         {
-                            array[10][10] = "Enemy wins";
-                        }
-                    }
+                            Random random = new Random();
+                            int safeDistance = 3; // Distance from the player to maintain
+                            int maxDistance = 6;  // Maximum distance from the player
+                            int targetRow = eRow;
+
+                            while (true)
+                            {
+                                Thread.Sleep(150); // Adjust enemy movement speed
+
+                                lock (array)
+                                {
+                                    if (!enemyDead)
+                                    {
+                                        // Recalculate target row if the player has moved significantly
+                                        if (eCol != pCol || Math.Abs(eRow - pRow) < safeDistance || Math.Abs(eRow - pRow) > maxDistance)
+                                        {
+                                            // Calculate new target row to maintain safe shooting distance
+                                            int offset = random.Next(safeDistance, maxDistance + 1);
+                                            targetRow = (pRow > eRow) ? pRow - offset : pRow + offset;
+                                            targetRow = Math.Clamp(targetRow, 0, array.Length - 1);
+                                        }
+
+                                        // Move smoothly towards the target row
+                                        if (eRow != targetRow)
+                                        {
+                                            array[eRow][eCol] = EmptyChar;
+                                            eRow += (targetRow > eRow) ? 1 : -1;
+                                            array[eRow][eCol] = EnemyChar;
+                                        }
+                                        // Move smoothly towards the player's column
+                                        else if (eCol != pCol)
+                                        {
+                                            array[eRow][eCol] = EmptyChar;
+                                            eCol += (pCol > eCol) ? 1 : -1;
+                                            array[eRow][eCol] = EnemyChar;
+                                        }
+                                    }
+                                }
+
+                                // Break if the enemy reaches the player (can remove when shooting logic is added)
+                                if (eRow == pRow && eCol == pCol)
+                                {
+                                    lock (array)
+                                    {
+                                        array[10][10] = "Enemy wins";
+                                    }
+                                    break;
+                                }
+                            }
+                        });
+
+                    });
+
+
+
 
 
 

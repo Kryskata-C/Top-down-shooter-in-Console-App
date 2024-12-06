@@ -47,7 +47,7 @@ namespace TopDownView_Console_App
                 }
 
                 Console.ResetColor(); 
-                Thread.Sleep(50); 
+                Thread.Sleep(100); 
             }
         }
     }
